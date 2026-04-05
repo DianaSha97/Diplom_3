@@ -4,13 +4,12 @@ import ru.educationservices.stellarburgers.handlers.ApiClient;
 import ru.educationservices.stellarburgers.constants.ApiUrls;
 import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
+import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
 import ru.educationservices.stellarburgers.pageobjects.AuthPage;
 import ru.educationservices.stellarburgers.pageobjects.ForgotPasswordPage;
@@ -23,31 +22,21 @@ import static ru.educationservices.stellarburgers.constants.WebDriverFactory.get
 import static org.hamcrest.Matchers.equalTo;
 
 @DisplayName("Авторизация пользователя")
-@RunWith(Parameterized.class)
 public class AuthTests {
     private WebDriver webDriver;
-    private String browserName;
     private AuthPage authPage;
     private MainPage mainPage;
     private RegisterPage registerPage;
     private ForgotPasswordPage forgotPasswordPage;
     private String name, email, password;
     private ApiClient apiClient;
-    @Parameterized.Parameters(name="Browser {0}")
-    public static Object[][] initParams() {
-        return new Object[][] {
-                {"chrome"},
-                {"yandex"}
-        };
-    }
-    public AuthTests(String browserName) {
-        this.browserName = browserName;
-    }
 
     @Before
-    @Step("Запуск браузера, подготовка тестовых данных")
+    @Step("Запуск браузера и подготовка тестовых данных")
     public void startUp() {
-        webDriver = getWebDriver(browserName);
+
+        webDriver = getWebDriver();
+
         webDriver.get(ApiUrls.URL_MAIN_PAGE);
 
         authPage = new AuthPage(webDriver);
@@ -64,32 +53,36 @@ public class AuthTests {
         Allure.addAttachment("Пароль", password);
 
         apiClient = new ApiClient();
-        apiClient.createUser(name, email,password);
+        apiClient.createUser(name, email, password);
     }
+
     @After
     @Step("Закрытие браузера и очистка данных")
     public void tearDown() {
-        webDriver.quit();
-        apiClient.deleteTestUser(email, password);
+
+        if (webDriver != null) {
+            webDriver.quit();
+        }
+
+        if (apiClient != null) {
+            apiClient.deleteTestUser(email, password);
+        }
     }
 
     @Step("Процесс авторизации")
     private void authUser() {
         authPage.setEmail(email);
         authPage.setPassword(password);
-
         authPage.clickAuthButton();
-
         authPage.waitFormSubmitted();
     }
+
     @Test
     @DisplayName("Вход по кнопке «Войти в аккаунт» на главной")
+    @Description("Проверяется успешная авторизация пользователя с главной страницы через кнопку «Войти в аккаунт». После авторизации ожидается, что кнопка в корзине отображает надпись «Оформить заказ».")
     public void authFromMainIsSuccess() {
-        Allure.parameter("Браузер", browserName);
-
         mainPage.clickAuthButton();
         authPage.waitAuthFormVisible();
-
         authUser();
 
         MatcherAssert.assertThat(
@@ -98,14 +91,13 @@ public class AuthTests {
                 equalTo("Оформить заказ")
         );
     }
+
     @Test
     @DisplayName("Вход через кнопку «Личный кабинет»")
+    @Description("Проверяется успешная авторизация пользователя через кнопку «Личный кабинет» на главной странице. После авторизации кнопка в корзине должна отображать надпись «Оформить заказ».")
     public void authFromLinkToProfileIsSuccess() {
-        Allure.parameter("Браузер", browserName);
-
         mainPage.clickLinkToProfile();
         authPage.waitAuthFormVisible();
-
         authUser();
 
         MatcherAssert.assertThat(
@@ -114,16 +106,14 @@ public class AuthTests {
                 equalTo("Оформить заказ")
         );
     }
+
     @Test
     @DisplayName("Вход через кнопку в форме регистрации")
+    @Description("Проверяется успешная авторизация пользователя через ссылку авторизации на форме регистрации. После авторизации кнопка в корзине должна отображать надпись «Оформить заказ».")
     public void authLinkFromRegFormIsSuccess() {
-        Allure.parameter("Браузер", browserName);
-
         webDriver.get(ApiUrls.URL_REGISTER_PAGE);
-
         registerPage.clickAuthLink();
         authPage.waitAuthFormVisible();
-
         authUser();
 
         MatcherAssert.assertThat(
@@ -132,16 +122,14 @@ public class AuthTests {
                 equalTo("Оформить заказ")
         );
     }
+
     @Test
     @DisplayName("Вход через кнопку в форме восстановления пароля")
+    @Description("Проверяется успешная авторизация пользователя через ссылку авторизации на форме восстановления пароля. После авторизации кнопка в корзине должна отображать надпись «Оформить заказ».")
     public void authLinkFromForgotPasswordFormIsSuccess() {
-        Allure.parameter("Браузер", browserName);
-
         webDriver.get(ApiUrls.URL_FORGOT_PASSWORD_PAGE);
-
         forgotPasswordPage.clickAuthLink();
         authPage.waitAuthFormVisible();
-
         authUser();
 
         MatcherAssert.assertThat(

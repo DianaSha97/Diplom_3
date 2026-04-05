@@ -4,13 +4,12 @@ import ru.educationservices.stellarburgers.handlers.ApiClient;
 import ru.educationservices.stellarburgers.constants.ApiUrls;
 import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
+import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
 import ru.educationservices.stellarburgers.pageobjects.RegisterPage;
 
@@ -21,27 +20,17 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 @DisplayName("Регистрация пользователя")
-@RunWith(Parameterized.class)
 public class RegisterPageTests {
     private WebDriver webDriver;
-    private String browserName;
     private RegisterPage registerPage;
     private String email, name, password;
 
-    @Parameterized.Parameters(name="Browser {0}")
-    public static Object[][] initParams() {
-        return new Object[][] {
-                {"chrome"},
-                {"yandex"}
-        };
-    }
-    public RegisterPageTests(String browserName) {
-        this.browserName = browserName;
-    }
     @Before
-    @Step("Запуск браузера, подготовка тестовых данных")
+    @Step("Запуск браузера и подготовка тестовых данных")
     public void startUp() {
-        webDriver = getWebDriver(browserName);
+
+        // Создание WebDriver через фабрику, браузер берется из системной переменной -Dbrowser
+        webDriver = getWebDriver();
         webDriver.get(ApiUrls.URL_REGISTER_PAGE);
         registerPage = new RegisterPage(webDriver);
 
@@ -63,15 +52,15 @@ public class RegisterPageTests {
 
     @Test
     @DisplayName("Успешная регистрация")
+    @Description("Проверяется успешная регистрация нового пользователя. После регистрации форма должна перезагрузиться и открыться страница авторизации.")
     public void registerNewUserIsSuccess() {
-        Allure.parameter("Браузер", browserName);
+        Allure.parameter("Браузер", System.getProperty("browser", "chrome"));
 
         registerPage.setEmail(email);
         registerPage.setName(name);
         registerPage.setPassword(password);
 
         registerPage.clickRegisterButton();
-
         registerPage.waitFormSubmitted("Вход");
 
         checkFormReload();
@@ -79,15 +68,15 @@ public class RegisterPageTests {
 
     @Test
     @DisplayName("Регистрация с коротким паролем")
+    @Description("Проверяется, что регистрация с паролем меньше минимальной длины завершается ошибкой. На форме должно появиться сообщение 'Некорректный пароль'.")
     public void registerNewUserLowPasswordIsFailed() {
-        Allure.parameter("Браузер", browserName);
+        Allure.parameter("Браузер", System.getProperty("browser", "chrome"));
 
         registerPage.setEmail(email);
         registerPage.setName(name);
-        registerPage.setPassword(password.substring(0, 3));
+        registerPage.setPassword(password.substring(0, 5));
 
         registerPage.clickRegisterButton();
-
         registerPage.waitErrorIsVisible();
 
         checkErrorMessage();

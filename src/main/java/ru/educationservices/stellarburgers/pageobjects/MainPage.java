@@ -1,5 +1,6 @@
 package ru.educationservices.stellarburgers.pageobjects;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -40,25 +41,30 @@ public class MainPage {
         return driver.findElements(ingredientsTitles);
     }
 
+    @Step("Клик по кнопке 'Войти в аккаунт'")
     public void clickAuthButton() {
         waitOverlayDisappear();
         wait.until(ExpectedConditions.elementToBeClickable(basketButton)).click();
     }
 
+    @Step("Переход в личный кабинет")
     public void clickLinkToProfile() {
         waitOverlayDisappear();
         wait.until(ExpectedConditions.elementToBeClickable(headerLinks));
         driver.findElements(headerLinks).get(2).click();
     }
 
+    @Step("Выбор вкладки 'Булки'")
     public void clickBunsButton() {
         clickIngredientTab(0);
     }
 
+    @Step("Выбор вкладки 'Соусы'")
     public void clickToppingsButton() {
         clickIngredientTab(1);
     }
 
+    @Step("Выбор вкладки 'Начинки'")
     public void clickFillingsButton() {
         clickIngredientTab(2);
     }
@@ -79,6 +85,7 @@ public class MainPage {
         });
     }
 
+    @Step("Получение текста кнопки оформления заказа")
     public String getBasketButtonText() {
         return driver.findElement(basketButton).getText();
     }
@@ -88,14 +95,17 @@ public class MainPage {
         return firstTab.getLocation().getY() + firstTab.getSize().getHeight();
     }
 
+    @Step("Получение позиции блока 'Булки'")
     public int getBunsLocation() {
         return getIngredientsTitles().get(0).getLocation().getY();
     }
 
+    @Step("Получение позиции блока 'Соусы'")
     public int getToppingsLocation() {
         return getIngredientsTitles().get(1).getLocation().getY();
     }
 
+    @Step("Получение позиции блока 'Начинки'")
     public int getFillingsLocation() {
         return getIngredientsTitles().get(2).getLocation().getY();
     }

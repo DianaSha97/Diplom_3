@@ -1,5 +1,6 @@
 package ru.educationservices.stellarburgers.pageobjects;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -18,6 +19,7 @@ public class ForgotPasswordPage {
         this.driver = driver;
     }
 
+    @Step("Переход на страницу авторизации")
     public void clickAuthLink() {
         waitButtonIsClickable();
         driver.findElement(authLink).click();
